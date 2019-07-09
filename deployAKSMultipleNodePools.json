@@ -6,7 +6,7 @@
             "type": "string"
         },
         "kubernetesVersion": {
-            "defaultValue": "1.12.5",
+            "defaultValue": "1.14.0",
             "type": "string"
         },
         "minAgentNodes": {
