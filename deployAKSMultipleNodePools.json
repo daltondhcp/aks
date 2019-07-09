@@ -1,0 +1,146 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "clusterName": {
+            "type": "string"
+        },
+        "kubernetesVersion": {
+            "defaultValue": "1.12.5",
+            "type": "string"
+        },
+        "minAgentNodes": {
+            "defaultValue": 2,
+            "type": "int"
+        },
+        "virtualMachineSKU": {
+            "defaultValue": "Standard_D16s_v3",
+            "type": "string"
+        },
+        "lxagentPoolName": {
+            "type": "string"
+        },
+        "winagentPoolName": {
+            "type": "string"
+        },
+        "enableAutoScaling": {
+            "type": "bool"
+        },
+        "subnetId": {
+            "type": "string"
+        },
+        "logAnalyticsWorkspaceResourceID": {
+            "type": "string"
+        },
+        "tenantId": {
+            "defaultValue": "",
+            "type": "string"
+        },
+        "servicePrincipalClientSecret": {
+            "defaultValue": null,
+            "type": "securestring"
+        },
+        "serverAppSecret": {
+            "defaultValue": null,
+            "type": "securestring"
+        },
+        "clientAppID": {
+            "type": "string"
+        },
+        "maxPods": {
+            "type": "int"
+        },
+        "serverAppID": {
+            "type": "string"
+        },
+        "servicePrincipalClientAppID": {
+            "type": "string"
+        },
+        "availabilityZones": {
+            "type": "array"
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.ContainerService/managedClusters",
+            "name": "[parameters('clusterName')]",
+            "apiVersion": "2019-06-01",
+            "location": "[resourceGroup().location]",
+            "tags": {
+            
+            },
+            "scale": null,
+            "properties": {
+                "kubernetesVersion": "[parameters('kubernetesVersion')]",
+                "dnsPrefix": "[parameters('clusterName')]",
+                "agentPoolProfiles": [
+                    {
+                        "name": "[parameters('agentPoolName')]",
+                        "count": "[parameters('minAgentNodes')]",
+                        "type": "VirtualMachineScaleSets",
+                        "vmSize": "[parameters('virtualMachineSKU')]",
+                        "osDiskSizeGB": 30,
+                        "storageProfile": "ManagedDisks",
+                        "vnetSubnetID": "[parameters('subnetId')]",
+                        "maxPods": "[parameters('maxPods')]",
+                        "osType": "Linux"
+                    },
+                    {
+                        "name": "win01",
+                        "count": "[parameters('minAgentNodes')]",
+                        "type": "VirtualMachineScaleSets",
+                        "vmSize": "[parameters('virtualMachineSKU')]",
+                        "osDiskSizeGB": 100,
+                        "storageProfile": "ManagedDisks",
+                        "vnetSubnetID": "[parameters('subnetId')]",
+                        "maxPods": "[parameters('maxPods')]",
+                        "osType": "Windows"
+                    }
+                ],
+                "linuxProfile": {
+                    "adminUsername": "azureuser",
+                    "ssh": {
+                        "publicKeys": [
+                            {
+                                "keyData": "ssh-rsa"
+                            }
+                        ]
+                    }
+                },
+                "windowsProfile": {
+                    "adminPassword": null,
+                    "adminUsername": "azureuser"
+                },
+                "servicePrincipalProfile": {
+                    "clientId": "[parameters('servicePrincipalClientAppID')]",
+                    "Secret": "[parameters('servicePrincipalClientSecret')]"
+                },
+                "addonProfiles": {
+                    "omsagent": {
+                        "enabled": true,
+                        "config": {
+                            "logAnalyticsWorkspaceResourceID": "[parameters('logAnalyticsWorkspaceResourceID')]"
+                        }
+                    }
+                },
+                "maxAgentPools": 8,
+                "enableRBAC": true,
+                "networkProfile": {
+                    "networkPolicy": "calico",
+                    "networkPlugin": "azure",
+                    "serviceCidr": "10.255.0.0/16",
+                    "dnsServiceIP": "10.255.0.10",
+                    "dockerBridgeCidr": "172.17.0.1/16"
+                },
+                "aadProfile": {
+                    "clientAppID": "[parameters('clientAppID')]",
+                    "serverAppID": "[parameters('serverAppID')]",
+                    "tenantID": "[parameters('tenantId')]",
+                    "serverAppSecret": "[parameters('serverAppSecret')]"
+                }
+            },
+            "dependsOn": []
+        }
+    ]
+}
