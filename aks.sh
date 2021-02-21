@@ -75,9 +75,8 @@ main() {
         fi
     done
     echo "-------------"
-    echo "AZ_SCRIPTS_OUTPUT_PATH: $AZ_SCRIPTS_OUTPUT_PATH"
-    echo $output
-    $output >  $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/scriptoutputs.json
+    echo "AZ_SCRIPTS_OUTPUT_PATH: $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/$AZ_SCRIPTS_PATH_SCRIPT_OUTPUT_FILE_NAME"
+    echo $output > $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/$AZ_SCRIPTS_PATH_SCRIPT_OUTPUT_FILE_NAME
     #cat $AZ_SCRIPTS_OUTPUT_PATH
 }
 main "$@"
