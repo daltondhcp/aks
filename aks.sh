@@ -22,8 +22,7 @@ function configureKubectl()
     chmod +x ~/.local/bin/kubectl/kubectl
     PATH=$PATH:~/.local/bin/kubectl
 
-    #get AKS credentials
-    az aks get-credentials --name $AKS_CLUSTER_NAME --resource-group $AKS_CLUSTER_RESOURCE_GROUP_NAME --admin
+
 
     #cat /root/.kube/config;
 }
@@ -45,7 +44,8 @@ main() {
     then
         installHelm
     fi
-
+    #get AKS credentials
+    az aks get-credentials --name $AKS_CLUSTER_NAME --resource-group $AKS_CLUSTER_RESOURCE_GROUP_NAME --admin
     echo "calling main with $@"
     IFS=';' read -r -a command <<< "$@"
     echo "Number of commands: ${#command[@]}"
@@ -77,7 +77,7 @@ main() {
     echo "-------------"
     echo "AZ_SCRIPTS_OUTPUT_PATH: $AZ_SCRIPTS_OUTPUT_PATH"
     echo $output
-    $output > $AZ_SCRIPTS_OUTPUT_PATH
+    $output >  $AZ_SCRIPTS_PATH_OUTPUT_DIRECTORY/scriptoutputs.json
     #cat $AZ_SCRIPTS_OUTPUT_PATH
 }
 main "$@"
