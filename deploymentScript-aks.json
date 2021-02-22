@@ -1,0 +1,70 @@
+{
+    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "scriptName": {
+            "type": "String",
+            "metadata": {
+                "description": "Required. Displayname of the script to be run."
+            }
+        },
+        "userMSIResourceID": {
+            "type": "String",
+            "defaultValue": "/subscriptions/f722337e-ce59-4cab-b7a1-0ea5b99f44a6/resourceGroups/akstest/providers/Microsoft.ManagedIdentity/userAssignedIdentities/akstest",
+            "metadata": {
+                "description": "ResourceID of the managed identity"
+            }
+        },
+        "aksClusterName": {
+            "type": "String",
+            "defaultValue": "jdcluster",
+            "metadata": {
+                "description": "AKS Cluster Name"
+            }
+        },
+        "aksResourceGroup": {
+            "type": "String",
+            "defaultValue": "akstest",
+            "metadata": {
+                "description": "AKS Resource Group Name"
+            }
+        }
+    },
+    "variables": {},
+    "resources": [
+        {
+            "type": "Microsoft.Resources/deploymentScripts",
+            "apiVersion": "2020-10-01",
+            "name": "[parameters('scriptName')]",
+            "location": "northeurope",
+            "kind": "AzureCLI",
+            "identity": {
+                "type": "userAssigned",
+                "userAssignedIdentities": {
+                    "[parameters('userMSIResourceID')]": {}
+                }
+            },
+            "properties": {
+                "forceUpdateTag": "19",
+                "AzCliVersion": "2.9.1",
+                "timeout": "PT10M",
+                "retentionInterval": "P1D",
+                "cleanupPreference": "OnExpiration",
+                "arguments": "kubectl apply -f https://raw.githubusercontent.com/mspnp/aks-secure-baseline/main/cluster-manifests/cluster-baseline-settings/ns-cluster-baseline-settings.yaml -o json; kubectl apply -f https://raw.githubusercontent.com/mspnp/aks-secure-baseline/main/cluster-manifests/cluster-baseline-settings/kured.yaml -o json",
+                "primaryScriptUri": "https://raw.githubusercontent.com/daltondhcp/aks/master/aks.sh",
+                "environmentVariables": [
+                    {
+                        "name": "AKS_CLUSTER_NAME",
+                        "value": "[parameters('aksClusterName')]"
+                    },
+                    {
+                        "name": "AKS_CLUSTER_RESOURCE_GROUP_NAME",
+                        "value": "[parameters('aksResourceGroup')]"
+                    }
+                ]
+            }
+        }
+    ],
+    "outputs": {
+    }
+}
