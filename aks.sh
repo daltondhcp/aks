@@ -1,34 +1,21 @@
 #!/bin/bash
-#set -e
-
-# if [ -z "$AKS_CLUSTER_NAME" ]; then
-#     echo "must provide AKS_CLUSTER_NAME env var"
-#     exit 1;
-# fi
-
-# if [ -z "$AKS_CLUSTER_RESOURCE_GROUP_NAME" ]; then
-#     echo "must provide AKS_CLUSTER_RESOURCE_GROUP_NAME env var"
-#     exit 1;
-# fi
 
 function configureKubectl()
 {
-    #download kubctl
+    #download kubectl
     curl -LO "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
 
-    #move kubectl  to local path
+    #move kubectl to local path
     mkdir -p ~/.local/bin/kubectl
     mv ./kubectl ~/.local/bin/kubectl
     chmod +x ~/.local/bin/kubectl/kubectl
     PATH=$PATH:~/.local/bin/kubectl
 
-
-
-    #cat /root/.kube/config;
 }
 
 function installHelm()
 {
+   #install helm
    curl https://raw.githubusercontent.com/helm/helm/master/scripts/get-helm-3 | bash
 }
 
@@ -46,6 +33,9 @@ main() {
     fi
     #get AKS credentials
     az aks get-credentials --name $AKS_CLUSTER_NAME --resource-group $AKS_CLUSTER_RESOURCE_GROUP_NAME --admin
+    #Onboard to arc
+    az extension add --name connectedk8s --yes
+    az connectedk8s connect --name $AKS_CLUSTER_NAME --resource-group $AKS_CLUSTER_RESOURCE_GROUP_NAME --location westeurope
     echo "calling main with $@"
     IFS=';' read -r -a command <<< "$@"
     echo "Number of commands: ${#command[@]}"
